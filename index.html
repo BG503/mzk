@@ -223,7 +223,7 @@ const MIZUKI_VOICES = [
 ];
 
 let voiceIdx = 0;
-const audioEl = new Audio();
+let currentAudio = null;
 
 function playRandomVoice() {
   // 避免连续重复
@@ -238,11 +238,21 @@ function playRandomVoice() {
   badge.classList.add('visible');
   setTimeout(() => badge.classList.remove('visible'), 3500);
 
-  // 播放真实游戏语音
-  audioEl.pause();
-  audioEl.src = v.url;
-  audioEl.load();
-  audioEl.play().catch(() => {});
+  // 停止之前的语音，每次创建新实例避免复用冲突
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.removeAttribute('src');
+    currentAudio.load();
+    currentAudio = null;
+  }
+  currentAudio = new Audio(v.url);
+  currentAudio.onended = () => { currentAudio = null; };
+  currentAudio.onerror = () => {
+    badge.textContent = '⚠️ 语音加载失败，请稍后再试';
+    setTimeout(() => badge.classList.remove('visible'), 2000);
+    currentAudio = null;
+  };
+  currentAudio.play().catch(() => {});
 }
 
 // 点击图片冒爱心 + 播放语音
