@@ -123,37 +123,6 @@
     100% { text-shadow: 0 0 35px rgba(220,180,245,0.8), 0 0 90px rgba(220,180,245,0.4), 0 2px 4px rgba(0,0,0,0.6); }
   }
 
-  .voice-hint {
-    font-size: 13px;
-    color: #888;
-    letter-spacing: 2px;
-    animation: hintPulse 2s ease-in-out infinite;
-  }
-
-  @keyframes hintPulse {
-    0%,100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
-  }
-
-  .voice-playing {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(30,30,60,0.9);
-    border: 1px solid #555;
-    border-radius: 20px;
-    padding: 10px 24px;
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: #ccc;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 10;
-  }
-
-  .voice-playing.visible { opacity: 1; }
 
   .heart {
     position: absolute;
@@ -187,10 +156,7 @@
     </div>
   </div>
   <div class="caption">酒柠可爱捏</div>
-  <div class="voice-hint">💬 点我听听瑞希说什么</div>
 </div>
-
-<div class="voice-playing" id="voicePlaying"></div>
 
 <script>
 // 背景漂浮粒子
@@ -210,20 +176,6 @@
   }
 })();
 
-// 瑞希真实语音库 (来自 Project SEKAI 游戏语音)
-const VOICE_BASE = 'voice';
-const MIZUKI_VOICES = [
-  { url: VOICE_BASE + '/area1_040_001.mp3', label: 'エリア会話 1' },
-  { url: VOICE_BASE + '/area1_040_002.mp3', label: 'エリア会話 2' },
-  { url: VOICE_BASE + '/area1_040_003.mp3', label: 'エリア会話 3' },
-  { url: VOICE_BASE + '/areatalk_2_040_001.mp3', label: 'エリア会話 4' },
-  { url: VOICE_BASE + '/areatalk_2_040_002.mp3', label: 'エリア会話 5' },
-  { url: VOICE_BASE + '/areatalk_2_040_003.mp3', label: 'エリア会話 6' },
-  { url: VOICE_BASE + '/areatalk_2_040_004.mp3', label: 'エリア会話 7' },
-];
-
-let voiceIdx = 0;
-let currentAudio = null;
 let audioCtx = null;
 
 // 可爱点击音效 (Web Audio API 合成)
@@ -249,36 +201,6 @@ function playClickSound() {
   } catch(e) {}
 }
 
-function playRandomVoice() {
-  // 避免连续重复
-  let idx;
-  do { idx = Math.floor(Math.random() * MIZUKI_VOICES.length); }
-  while (idx === voiceIdx && MIZUKI_VOICES.length > 1);
-  voiceIdx = idx;
-
-  const v = MIZUKI_VOICES[idx];
-  const badge = document.getElementById('voicePlaying');
-  badge.textContent = '🔊 瑞希: ' + v.label;
-  badge.classList.add('visible');
-  setTimeout(() => badge.classList.remove('visible'), 3500);
-
-  // 停止之前的语音，每次创建新实例避免复用冲突
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.removeAttribute('src');
-    currentAudio.load();
-    currentAudio = null;
-  }
-  currentAudio = new Audio(v.url);
-  currentAudio.onended = () => { currentAudio = null; };
-  currentAudio.onerror = () => {
-    badge.textContent = '⚠️ 语音加载失败，请稍后再试';
-    setTimeout(() => badge.classList.remove('visible'), 2000);
-    currentAudio = null;
-  };
-  currentAudio.play().catch(() => {});
-}
-
 // 点击图片冒爱心 + 播放语音
 (function() {
   const w = document.getElementById('imageWrapper');
@@ -300,9 +222,8 @@ function playRandomVoice() {
       w.appendChild(h);
       h.addEventListener('animationend', () => h.remove());
     }
-    // 可爱音效 + 随机语音
+    // 可爱点击音效
     playClickSound();
-    playRandomVoice();
   });
 })();
 </script>
