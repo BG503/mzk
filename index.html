@@ -123,6 +123,38 @@
     100% { text-shadow: 0 0 35px rgba(220,180,245,0.8), 0 0 90px rgba(220,180,245,0.4), 0 2px 4px rgba(0,0,0,0.6); }
   }
 
+  .voice-hint {
+    font-size: 13px;
+    color: #888;
+    letter-spacing: 2px;
+    animation: hintPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes hintPulse {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+
+  .voice-playing {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30,30,60,0.9);
+    border: 1px solid #555;
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #ccc;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+
+  .voice-playing.visible { opacity: 1; }
+
   .heart {
     position: absolute;
     animation: heartPop 1.2s ease-out forwards;
@@ -155,7 +187,10 @@
     </div>
   </div>
   <div class="caption">酒柠可爱捏</div>
+  <div class="voice-hint">💬 点我听听瑞希说什么</div>
 </div>
+
+<div class="voice-playing" id="voicePlaying"></div>
 
 <script>
 // 背景漂浮粒子
@@ -175,11 +210,60 @@
   }
 })();
 
-// 点击图片冒爱心
+// 瑞希语音库
+const MIZUKI_VOICES = [
+  'ねえ、聞いてくれる？',
+  '私、暁山瑞希だよ。よろしくね。',
+  'えへへ、何見てるの？',
+  '今日も一緒に遊ぼうよ！',
+  'ふふっ、楽しいね。',
+  '私のこと、忘れないでね。',
+  'こんな感じでどうかな？',
+  'あっ、いいこと思いついちゃった！',
+  'ねえねえ、これ知ってる？',
+  '一緒にいると、すごく楽しいんだ。',
+  'ふふ、最高だね！',
+  '私にも任せてよ！',
+  'うん、それいいと思う！',
+];
+
+let voiceIdx = 0;
+
+function playRandomVoice() {
+  // 避免连续重复
+  let idx;
+  do { idx = Math.floor(Math.random() * MIZUKI_VOICES.length); }
+  while (idx === voiceIdx && MIZUKI_VOICES.length > 1);
+  voiceIdx = idx;
+
+  const text = MIZUKI_VOICES[idx];
+  const badge = document.getElementById('voicePlaying');
+  badge.textContent = '🔊 ' + text;
+  badge.classList.add('visible');
+  setTimeout(() => badge.classList.remove('visible'), 3000);
+
+  // 尝试使用系统日语语音合成
+  if (window.speechSynthesis) {
+    // 取消当前正在播放的语音
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = 0.95;
+    u.pitch = 1.15;
+    // 尝试选日语女声
+    const voices = speechSynthesis.getVoices();
+    const jaVoice = voices.find(v => v.lang.startsWith('ja'));
+    if (jaVoice) u.voice = jaVoice;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// 点击图片冒爱心 + 播放语音
 (function() {
   const w = document.getElementById('imageWrapper');
   const hearts = ['💕','💜','💗','💝','🩷','💖'];
   w.addEventListener('click', function(e) {
+    // 爱心特效
     const rect = w.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -195,8 +279,16 @@
       w.appendChild(h);
       h.addEventListener('animationend', () => h.remove());
     }
+    // 随机语音
+    playRandomVoice();
   });
 })();
+
+// 预加载语音列表
+if (window.speechSynthesis) speechSynthesis.getVoices();
+window.addEventListener('load', () => {
+  if (window.speechSynthesis) speechSynthesis.getVoices();
+});
 </script>
 
 </body>
