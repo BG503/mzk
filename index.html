@@ -211,15 +211,15 @@
 })();
 
 // 瑞希真实语音库 (来自 Project SEKAI 游戏语音)
-const CDN = 'https://storage.sekai.best/sekai-jp-assets/sound/actionset/voice';
+const VOICE_BASE = 'voice';
 const MIZUKI_VOICES = [
-  { url: CDN + '/areatalk01_040/area1_040_001.mp3', label: 'エリア会話 1' },
-  { url: CDN + '/areatalk01_040/area1_040_002.mp3', label: 'エリア会話 2' },
-  { url: CDN + '/areatalk01_040/area1_040_003.mp3', label: 'エリア会話 3' },
-  { url: CDN + '/areatalk02_040/areatalk_2_040_001.mp3', label: 'エリア会話 4' },
-  { url: CDN + '/areatalk02_040/areatalk_2_040_002.mp3', label: 'エリア会話 5' },
-  { url: CDN + '/areatalk02_040/areatalk_2_040_003.mp3', label: 'エリア会話 6' },
-  { url: CDN + '/areatalk02_040/areatalk_2_040_004.mp3', label: 'エリア会話 7' },
+  { url: VOICE_BASE + '/area1_040_001.mp3', label: 'エリア会話 1' },
+  { url: VOICE_BASE + '/area1_040_002.mp3', label: 'エリア会話 2' },
+  { url: VOICE_BASE + '/area1_040_003.mp3', label: 'エリア会話 3' },
+  { url: VOICE_BASE + '/areatalk_2_040_001.mp3', label: 'エリア会話 4' },
+  { url: VOICE_BASE + '/areatalk_2_040_002.mp3', label: 'エリア会話 5' },
+  { url: VOICE_BASE + '/areatalk_2_040_003.mp3', label: 'エリア会話 6' },
+  { url: VOICE_BASE + '/areatalk_2_040_004.mp3', label: 'エリア会話 7' },
 ];
 
 let voiceIdx = 0;
@@ -239,7 +239,9 @@ function playRandomVoice() {
   setTimeout(() => badge.classList.remove('visible'), 3500);
 
   // 播放真实游戏语音
+  audioEl.pause();
   audioEl.src = v.url;
+  audioEl.load();
   audioEl.play().catch(() => {});
 }
 
