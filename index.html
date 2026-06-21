@@ -224,6 +224,30 @@ const MIZUKI_VOICES = [
 
 let voiceIdx = 0;
 let currentAudio = null;
+let audioCtx = null;
+
+// 可爱点击音效 (Web Audio API 合成)
+function playClickSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime;
+    const g = audioCtx.createGain();
+    g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+    // 两个可爱的高频音符，模拟 "叮~咚~"
+    [800, 1200].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t + i * 0.08);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, t + i * 0.08 + 0.15);
+      osc.connect(g);
+      osc.start(t + i * 0.08);
+      osc.stop(t + i * 0.08 + 0.2);
+    });
+  } catch(e) {}
+}
 
 function playRandomVoice() {
   // 避免连续重复
@@ -276,7 +300,8 @@ function playRandomVoice() {
       w.appendChild(h);
       h.addEventListener('animationend', () => h.remove());
     }
-    // 随机语音
+    // 可爱音效 + 随机语音
+    playClickSound();
     playRandomVoice();
   });
 })();
