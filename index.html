@@ -210,24 +210,20 @@
   }
 })();
 
-// 瑞希语音库
+// 瑞希真实语音库 (来自 Project SEKAI 游戏语音)
+const CDN = 'https://storage.sekai.best/sekai-jp-assets/sound/actionset/voice';
 const MIZUKI_VOICES = [
-  'ねえ、聞いてくれる？',
-  '私、暁山瑞希だよ。よろしくね。',
-  'えへへ、何見てるの？',
-  '今日も一緒に遊ぼうよ！',
-  'ふふっ、楽しいね。',
-  '私のこと、忘れないでね。',
-  'こんな感じでどうかな？',
-  'あっ、いいこと思いついちゃった！',
-  'ねえねえ、これ知ってる？',
-  '一緒にいると、すごく楽しいんだ。',
-  'ふふ、最高だね！',
-  '私にも任せてよ！',
-  'うん、それいいと思う！',
+  { url: CDN + '/areatalk01_040/area1_040_001.mp3', label: 'エリア会話 1' },
+  { url: CDN + '/areatalk01_040/area1_040_002.mp3', label: 'エリア会話 2' },
+  { url: CDN + '/areatalk01_040/area1_040_003.mp3', label: 'エリア会話 3' },
+  { url: CDN + '/areatalk02_040/areatalk_2_040_001.mp3', label: 'エリア会話 4' },
+  { url: CDN + '/areatalk02_040/areatalk_2_040_002.mp3', label: 'エリア会話 5' },
+  { url: CDN + '/areatalk02_040/areatalk_2_040_003.mp3', label: 'エリア会話 6' },
+  { url: CDN + '/areatalk02_040/areatalk_2_040_004.mp3', label: 'エリア会話 7' },
 ];
 
 let voiceIdx = 0;
+const audioEl = new Audio();
 
 function playRandomVoice() {
   // 避免连续重复
@@ -236,26 +232,15 @@ function playRandomVoice() {
   while (idx === voiceIdx && MIZUKI_VOICES.length > 1);
   voiceIdx = idx;
 
-  const text = MIZUKI_VOICES[idx];
+  const v = MIZUKI_VOICES[idx];
   const badge = document.getElementById('voicePlaying');
-  badge.textContent = '🔊 ' + text;
+  badge.textContent = '🔊 瑞希: ' + v.label;
   badge.classList.add('visible');
-  setTimeout(() => badge.classList.remove('visible'), 3000);
+  setTimeout(() => badge.classList.remove('visible'), 3500);
 
-  // 尝试使用系统日语语音合成
-  if (window.speechSynthesis) {
-    // 取消当前正在播放的语音
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ja-JP';
-    u.rate = 0.95;
-    u.pitch = 1.15;
-    // 尝试选日语女声
-    const voices = speechSynthesis.getVoices();
-    const jaVoice = voices.find(v => v.lang.startsWith('ja'));
-    if (jaVoice) u.voice = jaVoice;
-    window.speechSynthesis.speak(u);
-  }
+  // 播放真实游戏语音
+  audioEl.src = v.url;
+  audioEl.play().catch(() => {});
 }
 
 // 点击图片冒爱心 + 播放语音
@@ -283,12 +268,6 @@ function playRandomVoice() {
     playRandomVoice();
   });
 })();
-
-// 预加载语音列表
-if (window.speechSynthesis) speechSynthesis.getVoices();
-window.addEventListener('load', () => {
-  if (window.speechSynthesis) speechSynthesis.getVoices();
-});
 </script>
 
 </body>
